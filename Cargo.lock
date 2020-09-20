@@ -183,6 +183,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "getprice"
+version = "0.1.0"
+dependencies = [
+ "docopt",
+ "log",
+ "quick-error",
+ "reqwest",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -565,19 +578,6 @@ name = "ppv-lite86"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c36fa947111f5c62a733b652544dd0016a43ce89619538a8ef92724a6f501a20"
-
-[[package]]
-name = "price-getter"
-version = "0.1.0"
-dependencies = [
- "docopt",
- "log",
- "quick-error",
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
-]
 
 [[package]]
 name = "proc-macro2"

@@ -1,5 +1,5 @@
 [package]
-name = "price-getter"
+name = "getprice"
 version = "0.1.0"
 authors = ["Greg Kapka <greg@kapka.co.uk>"]
 edition = "2018"
