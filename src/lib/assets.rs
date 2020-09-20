@@ -11,6 +11,56 @@ use crate::lib::{
 };
 
 #[derive(Debug, PartialEq, Eq)]
+pub struct Assets(pub Vec<Asset>);
+
+impl Assets {
+    pub fn new(assets: Vec<Asset> ) -> Self {
+        Self(assets)
+    }
+
+    pub fn from_strings(strings: &[String]) -> Result<Self> {
+        Ok(Assets::new(
+            strings.iter().map(|asset_string| Asset::from_str(&asset_string)).collect::<Result<Vec<Asset>>>()?)
+        )
+    }
+
+    fn get_prices(&self, amounts: &[f64]) -> Result<Vec<JsonValue>> {
+        self
+            .0
+            .iter()
+            .enumerate()
+            .map(|(i, asset)| asset.get_price_for_x(amounts[i]))
+            .collect()
+    }
+
+    fn get_price_totals(price_jsons: &[JsonValue]) -> Result<Vec<f64>> {
+        price_jsons
+            .iter()
+            .map(|json| -> Result<f64> {
+                Ok(
+                   json
+                    .get("total")
+                    .ok_or(NoneError("No `result` field in JSON!"))?
+                    .as_f64()
+                    .ok_or(NoneError("Could not parse to f64!"))?
+                )
+            })
+            .collect::<Result<Vec<f64>>>()
+
+    }
+
+    fn sum_totals(price_jsons: &[JsonValue]) -> Result<f64> {
+        Ok(Self::get_price_totals(price_jsons)?.iter().sum())
+    }
+
+    pub fn get_prices_json(&self, amounts: &[f64]) -> Result<JsonValue> {
+        let prices = self.get_prices(amounts)?;
+        let sum = Self::sum_totals(&prices)?;
+        Ok(json!({ "grand_total": (sum * 100.0).round() / 100.0, "prices": prices }))
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum Asset {
     BTC,
     ADA,
@@ -73,7 +123,7 @@ impl Asset {
             "price": price,
             "currency": "USD",
             "asset": self.to_ticker(),
-            "total": format!("{:.2}", price * x),
+            "total": (price * x * 100.0).round() / 100.0,
         }))
     }
 

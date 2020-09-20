@@ -14,6 +14,10 @@ quick_error! {
             from()
             display("✘ Serde_json error: {}", err)
         }
+        DocoptError(err: docopt::Error) {
+            from()
+            display("✘ Docopt error: {}", err)
+        }
         ParseFloat(err: std::num::ParseFloatError) {
             from()
             display("✘ Parse float error: {}", err)
