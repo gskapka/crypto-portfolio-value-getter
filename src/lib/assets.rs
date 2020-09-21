@@ -57,7 +57,7 @@ pub enum Asset {
     ADA,
     ETH,
     XMR,
-    //PNT, // TODO ADD this in!
+    PNT,
 }
 
 impl Asset {
@@ -66,6 +66,7 @@ impl Asset {
             Asset::BTC => "BTC",
             Asset::ETH => "ETH",
             Asset::ADA => "ADA",
+            Asset::PNT => "PNT",
             Asset::XMR => "XMR",
         }
     }
@@ -80,9 +81,14 @@ impl Asset {
     }
 
     fn get_api_price_call_url(&self) -> String {
-        let suffix = "USD";
-        let prefix = "https://api.kraken.com/0/public/Ticker?pair=";
-        format!("{}{}{}", prefix, self.to_ticker(), suffix)
+        match self {
+            Asset::PNT => "https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0x89Ab32156e46F46D02ade3FEcbe5Fc4243B9AAeD&vs_currencies=btc".to_string(),
+            _ => {
+                let suffix = "USD";
+                let prefix = "https://api.kraken.com/0/public/Ticker?pair=";
+                format!("{}{}{}", prefix, self.to_ticker(), suffix)
+            }
+        }
     }
 
     fn make_reqwest(&self, url: &str) -> Result<JsonValue> {
@@ -90,21 +96,37 @@ impl Asset {
     }
 
     fn get_price_from_json_response(&self, json_value: &JsonValue) -> Result<f64> {
-        let string_vec: Vec<String> = serde_json::from_str(
-            &json_value
-                .get("result")
-                .ok_or(NoneError("No `result` field in JSON!"))?
-                .get(self.to_ticker_in_response())
-                .ok_or(NoneError("No response field in JSON!"))?
-                .get("c")
-                .ok_or(NoneError("No `c` field in JSON"))?
-                .to_string(),
-        )?;
-        let f64_vec = string_vec
-            .iter()
-            .map(|string| -> Result<f64> { Ok(string.parse::<f64>()?) })
-            .collect::<Result<Vec<f64>>>()?;
-        Ok(f64_vec[0])
+        match self {
+            Asset::PNT => {
+                let pnt_price_in_btc = json_value
+                    .get("0x89ab32156e46f46d02ade3fecbe5fc4243b9aaed")
+                    .ok_or(NoneError("No PNT contract address field in JSON!"))?
+                    .get("btc")
+                    .ok_or(NoneError("No `btc` field in JSON!"))?
+                    .as_f64()
+                    .ok_or(NoneError("Could not parse value to f64!"))?;
+                let btc_price_in_usd = Asset::from_str("btc")?.get_price()?;
+                let pnt_price_in_usd = pnt_price_in_btc * btc_price_in_usd;
+                Ok(pnt_price_in_usd)
+            }
+            _ => {
+                let string_vec: Vec<String> = serde_json::from_str(
+                    &json_value
+                        .get("result")
+                        .ok_or(NoneError("No `result` field in JSON!"))?
+                        .get(self.to_ticker_in_response())
+                        .ok_or(NoneError("No response field in JSON!"))?
+                        .get("c")
+                        .ok_or(NoneError("No `c` field in JSON"))?
+                        .to_string(),
+                )?;
+                let f64_vec = string_vec
+                    .iter()
+                    .map(|string| -> Result<f64> { Ok(string.parse::<f64>()?) })
+                    .collect::<Result<Vec<f64>>>()?;
+                Ok(f64_vec[0])
+            }
+        }
     }
 
     fn get_price(&self) -> Result<f64> {
@@ -128,6 +150,7 @@ impl Asset {
             "XMR" | "MONERO" => Ok(Self::XMR),
             "BTC" | "BITCOIN" => Ok(Self::BTC),
             "ADA" | "CARDANO" => Ok(Self::ADA),
+            "PNT" | "PNETWORK" => Ok(Self::PNT),
             "ETH" | "ETHEREUM" => Ok(Self::ETH),
             _ => Err(format!("Unrecognized asset: {}", s).into()),
         }
@@ -174,5 +197,13 @@ mod tests {
         let string = "eth";
         let result = Asset::from_str(string).unwrap();
         assert_eq!(result, Asset::ETH);
+    }
+
+    #[test]
+    fn should_get_pnt_price() {
+        let amount = 1.0;
+        let asset = Asset::from_str("pnt").unwrap();
+        let result = asset.get_price_for_x(amount).unwrap();
+        println!("result {}", result.to_string());
     }
 }
