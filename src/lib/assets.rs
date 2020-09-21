@@ -56,6 +56,7 @@ pub enum Asset {
     BTC,
     ADA,
     ETH,
+    XMR,
     //PNT, // TODO ADD this in!
 }
 
@@ -65,6 +66,7 @@ impl Asset {
             Asset::BTC => "BTC",
             Asset::ETH => "ETH",
             Asset::ADA => "ADA",
+            Asset::XMR => "XMR",
         }
     }
 
@@ -123,6 +125,7 @@ impl Asset {
 
     pub fn from_str(s: &str) -> Result<Self> {
         match s.to_uppercase().as_ref() {
+            "XMR" | "MONERO" => Ok(Self::XMR),
             "BTC" | "BITCOIN" => Ok(Self::BTC),
             "ADA" | "CARDANO" => Ok(Self::ADA),
             "ETH" | "ETHEREUM" => Ok(Self::ETH),
