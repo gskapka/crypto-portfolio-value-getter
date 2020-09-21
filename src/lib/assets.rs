@@ -1,32 +1,26 @@
-use serde_json::{
-    json,
-    Value as JsonValue,
-};
+use serde_json::{json, Value as JsonValue};
 
-use crate::lib::{
-    types::{
-        Result,
-        NoneError,
-    },
-};
+use crate::lib::types::{NoneError, Result};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Assets(pub Vec<Asset>);
 
 impl Assets {
-    pub fn new(assets: Vec<Asset> ) -> Self {
+    pub fn new(assets: Vec<Asset>) -> Self {
         Self(assets)
     }
 
     pub fn from_strings(strings: &[String]) -> Result<Self> {
         Ok(Assets::new(
-            strings.iter().map(|asset_string| Asset::from_str(&asset_string)).collect::<Result<Vec<Asset>>>()?)
-        )
+            strings
+                .iter()
+                .map(|asset_string| Asset::from_str(&asset_string))
+                .collect::<Result<Vec<Asset>>>()?,
+        ))
     }
 
     fn get_prices(&self, amounts: &[f64]) -> Result<Vec<JsonValue>> {
-        self
-            .0
+        self.0
             .iter()
             .enumerate()
             .map(|(i, asset)| asset.get_price_for_x(amounts[i]))
@@ -37,16 +31,13 @@ impl Assets {
         price_jsons
             .iter()
             .map(|json| -> Result<f64> {
-                Ok(
-                   json
+                Ok(json
                     .get("total")
                     .ok_or(NoneError("No `result` field in JSON!"))?
                     .as_f64()
-                    .ok_or(NoneError("Could not parse to f64!"))?
-                )
+                    .ok_or(NoneError("Could not parse to f64!"))?)
             })
             .collect::<Result<Vec<f64>>>()
-
     }
 
     fn sum_totals(price_jsons: &[JsonValue]) -> Result<f64> {
@@ -99,14 +90,17 @@ impl Asset {
     fn get_price_from_json_response(&self, json_value: &JsonValue) -> Result<f64> {
         let string_vec: Vec<String> = serde_json::from_str(
             &json_value
-                .get("result").ok_or(NoneError("No `result` field in JSON!"))?
-                .get(self.to_ticker_in_response()).ok_or(NoneError("No response field in JSON!"))?
-                .get("c").ok_or(NoneError("No `c` field in JSON"))?
-                .to_string()
+                .get("result")
+                .ok_or(NoneError("No `result` field in JSON!"))?
+                .get(self.to_ticker_in_response())
+                .ok_or(NoneError("No response field in JSON!"))?
+                .get("c")
+                .ok_or(NoneError("No `c` field in JSON"))?
+                .to_string(),
         )?;
         let f64_vec = string_vec
             .iter()
-            .map(|string| -> Result<f64> { Ok(string.parse::<f64>()?)})
+            .map(|string| -> Result<f64> { Ok(string.parse::<f64>()?) })
             .collect::<Result<Vec<f64>>>()?;
         Ok(f64_vec[0])
     }
@@ -132,7 +126,7 @@ impl Asset {
             "BTC" | "BITCOIN" => Ok(Self::BTC),
             "ADA" | "CARDANO" => Ok(Self::ADA),
             "ETH" | "ETHEREUM" => Ok(Self::ETH),
-            _ => Err(format!("Unrecognized asset: {}", s).into())
+            _ => Err(format!("Unrecognized asset: {}", s).into()),
         }
     }
 }
@@ -165,7 +159,7 @@ mod tests {
     #[test]
     fn should_get_price_of_x_eth() {
         #[allow(clippy::approx_constant)]
-        let x:f64 = 3.14;
+        let x: f64 = 3.14;
         let asset = Asset::ETH;
         let result = asset.get_price_for_x(x);
         assert!(result.is_ok());
