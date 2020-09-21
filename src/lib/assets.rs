@@ -164,6 +164,7 @@ mod tests {
 
     #[test]
     fn should_get_price_of_x_eth() {
+        #[allow(clippy::approx_constant)]
         let x:f64 = 3.14;
         let asset = Asset::ETH;
         let result = asset.get_price_for_x(x);
