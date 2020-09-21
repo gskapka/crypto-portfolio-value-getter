@@ -1,12 +1,12 @@
 pub const USAGE_INFO: &str = "
-❍ Crypto Price Getter ❍
+❍ Crypto Portfolio Value Getter ❍
 
     Copyright Greg Kapka 2020
     Questions: greg@kapka.co.uk
 
 ❍ Info ❍
 
-A simple CLI for getting the price of various crypto assets.
+A simple CLI for getting & summing the price of various crypto assets.
 
 ❍ Usage ❍
 
