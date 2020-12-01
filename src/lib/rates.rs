@@ -2,6 +2,37 @@ use crate::lib::types::{ Result, NoneError};
 
 use serde_json::Value as JsonValue;
 
+
+#[derive(Debug)]
+pub enum ExchangeRate {
+    GBP(f64),
+    USD(f64),
+}
+
+impl ExchangeRate {
+    pub fn get(currency_symbol: &str) -> Result<Self> {
+        match currency_symbol {
+            "USD" | "usd" => Ok(Self::USD(1.0)),
+            "GBP" | "gpb" => Ok(Self::GBP(ExchangeRates::get()?.gbp)),
+            _ => Err(format!("Unsupported currency: {}", currency_symbol).into()),
+        }
+    }
+
+    pub fn get_rate(&self) -> f64 {
+        match self {
+            ExchangeRate::GBP(rate) => *rate,
+            ExchangeRate::USD(rate) => *rate,
+        }
+    }
+
+    pub fn get_symbol(&self) -> String {
+        match self {
+            ExchangeRate::GBP(_) => "GBP".to_string(),
+            ExchangeRate::USD(_) => "USD".to_string(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct ExchangeRates {
     pub gbp: f64,
@@ -23,11 +54,6 @@ impl ExchangeRates {
         let maybe_gbp = rates.get("GBP").ok_or(NoneError("No `GBP` in rates json!"))?;
         Ok(maybe_gbp.as_f64().ok_or(NoneError("broke"))?)
     }
-
-    #[cfg(test)]
-    pub fn new_dummy_rates() -> Self {
-        Self { gbp: 0.75 }
-    }
 }
 
 #[cfg(test)]
@@ -38,5 +64,29 @@ mod tests {
     fn should_get_exchange_rates() {
         let rates = ExchangeRates::get().unwrap();
         assert!(rates.gbp > 0.0);
+    }
+
+    #[test]
+    fn should_get_gbp_exchange_rate_correctly() {
+        let result = ExchangeRate::get("GBP").unwrap().get_rate();
+        assert!(result > 0.0);
+    }
+
+    #[test]
+    fn should_get_usd_exchange_rate_correctly() {
+        let result = ExchangeRate::get("usd").unwrap().get_rate();
+        assert_eq!(result, 1.0);
+    }
+
+    #[test]
+    fn should_get_gbp_symbol_correctly() {
+        let result = ExchangeRate::get("GBP").unwrap().get_symbol();
+        assert_eq!(result, "GBP");
+    }
+
+    #[test]
+    fn should_get_usd_symbol_correctly() {
+        let result = ExchangeRate::get("usd").unwrap().get_symbol();
+        assert_eq!(result, "USD");
     }
 }
