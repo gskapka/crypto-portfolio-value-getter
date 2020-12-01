@@ -1,6 +1,9 @@
 use serde_json::{json, Value as JsonValue};
 
-use crate::lib::types::{NoneError, Result};
+use crate::lib::{
+    rates::ExchangeRates,
+    types::{NoneError, Result},
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Assets(pub Vec<Asset>);
@@ -19,11 +22,11 @@ impl Assets {
         ))
     }
 
-    fn get_prices(&self, amounts: &[f64]) -> Result<Vec<JsonValue>> {
+    fn get_prices(&self, amounts: &[f64], rates: &ExchangeRates) -> Result<Vec<JsonValue>> {
         self.0
             .iter()
             .enumerate()
-            .map(|(i, asset)| asset.get_price_for_x(amounts[i]))
+            .map(|(i, asset)| asset.get_price_for_x(amounts[i], rates))
             .collect()
     }
 
@@ -44,8 +47,8 @@ impl Assets {
         Ok(Self::get_price_totals(price_jsons)?.iter().sum())
     }
 
-    pub fn get_prices_json(&self, amounts: &[f64]) -> Result<JsonValue> {
-        let prices = self.get_prices(amounts)?;
+    pub fn get_prices_json(&self, amounts: &[f64], rates: &ExchangeRates) -> Result<JsonValue> {
+        let prices = self.get_prices(amounts, rates)?;
         let sum = Self::sum_totals(&prices)?;
         Ok(json!({ "grand_total": (sum * 100.0).round() / 100.0, "prices": prices }))
     }
@@ -95,7 +98,7 @@ impl Asset {
         Ok(serde_json::from_str(&reqwest::blocking::get(url)?.text()?)?)
     }
 
-    fn get_price_from_json_response(&self, json_value: &JsonValue) -> Result<f64> {
+    fn get_price_from_json_response(&self, json_value: &JsonValue, rates: &ExchangeRates) -> Result<f64> {
         match self {
             Asset::PNT => {
                 let pnt_price_in_btc = json_value
@@ -105,7 +108,7 @@ impl Asset {
                     .ok_or(NoneError("No `btc` field in JSON!"))?
                     .as_f64()
                     .ok_or(NoneError("Could not parse value to f64!"))?;
-                let btc_price_in_usd = Asset::from_str("btc")?.get_price()?;
+                let btc_price_in_usd = Asset::from_str("btc")?.get_price(rates)?;
                 let pnt_price_in_usd = pnt_price_in_btc * btc_price_in_usd;
                 Ok(pnt_price_in_usd)
             }
@@ -129,17 +132,18 @@ impl Asset {
         }
     }
 
-    fn get_price(&self) -> Result<f64> {
+    fn get_price(&self, rates: &ExchangeRates) -> Result<f64> {
         self.make_reqwest(&self.get_api_price_call_url())
-            .and_then(|json| self.get_price_from_json_response(&json))
+            .and_then(|json| self.get_price_from_json_response(&json, rates))
+            .map(|price| price * rates.gbp)
     }
 
-    pub fn get_price_for_x(&self, x: f64) -> Result<JsonValue> {
-        let price = self.get_price()?;
+    pub fn get_price_for_x(&self, x: f64, rates: &ExchangeRates) -> Result<JsonValue> {
+        let price = self.get_price(rates)?;
         Ok(json!({
             "amount": x,
             "price": price,
-            "currency": "USD",
+            "currency": "GBP",
             "asset": self.to_ticker(),
             "total": (price * x * 100.0).round() / 100.0,
         }))
@@ -164,21 +168,21 @@ mod tests {
     #[test]
     fn should_get_price_of_btc() {
         let asset = Asset::BTC;
-        let result = asset.get_price().unwrap();
+        let result = asset.get_price(&ExchangeRates::new_dummy_rates()).unwrap();
         assert!(result > 0.0);
     }
 
     #[test]
     fn should_get_price_of_ada() {
         let asset = Asset::ADA;
-        let result = asset.get_price().unwrap();
+        let result = asset.get_price(&ExchangeRates::new_dummy_rates()).unwrap();
         assert!(result > 0.0);
     }
 
     #[test]
     fn should_get_price_of_eth() {
         let asset = Asset::ETH;
-        let result = asset.get_price().unwrap();
+        let result = asset.get_price(&ExchangeRates::new_dummy_rates()).unwrap();
         assert!(result > 0.0);
     }
 
@@ -187,7 +191,7 @@ mod tests {
         #[allow(clippy::approx_constant)]
         let x: f64 = 3.14;
         let asset = Asset::ETH;
-        let result = asset.get_price_for_x(x);
+        let result = asset.get_price_for_x(x, &ExchangeRates::new_dummy_rates());
         assert!(result.is_ok());
         println!("{}", result.unwrap().to_string());
     }
@@ -203,7 +207,7 @@ mod tests {
     fn should_get_pnt_price() {
         let amount = 1.0;
         let asset = Asset::from_str("pnt").unwrap();
-        let result = asset.get_price_for_x(amount).unwrap();
+        let result = asset.get_price_for_x(amount, &ExchangeRates::new_dummy_rates()).unwrap();
         println!("result {}", result.to_string());
     }
 }
