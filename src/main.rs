@@ -17,9 +17,12 @@ use crate::lib::{
 fn main() -> Result<()> {
     match get_cli_args().and_then(|cli_args| match cli_args {
         CliArgs { cmd_version: true, .. } => get_version_info(),
-        CliArgs { cmd_of: true, .. } => {
-            get_price_of(&cli_args.arg_symbol, &cli_args.arg_amount, &cli_args.flag_currency)
-        },
+        CliArgs { cmd_of: true, .. } => get_price_of(
+            &cli_args.arg_symbol,
+            &cli_args.arg_amount,
+            &cli_args.flag_currency,
+            &cli_args.arg_keyFilePath,
+        ),
         _ => Err(USAGE_INFO.into()),
     }) {
         Ok(result) => {

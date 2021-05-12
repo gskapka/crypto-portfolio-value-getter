@@ -30,6 +30,10 @@ quick_error! {
             from()
             display("✘ From I/O error: {}", err)
         }
+        EnvVarError(err: std::env::VarError) {
+            from()
+            display("✘ Environment variable error: {}", err)
+        }
         NoneError(err: &'static str) {
             display("✘ None error: {}", err)
         }

@@ -12,7 +12,7 @@ A simple CLI for getting & summing the price of various crypto assets.
 
 Usage:  getprice --help
         getprice version
-        getprice of (<symbol> <amount>)... [--currency=<SYMBOL>]
+        getprice of (<symbol> <amount>)... <keyFilePath> [--currency=<SYMBOL>]
 
 Commands:
 
@@ -20,6 +20,7 @@ Commands:
     of                    ❍ Gets the price of a given token.
     <symbol>              ❍ The symbol of a given token, eg ETH.
     <amount>              ❍ The amount of that given token to calculate the price of.
+    <keyFilePath>         ❍ The path to your GPP-encrypted CoinMarketCap API key file.
 
 Options:
 
