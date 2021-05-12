@@ -22,6 +22,14 @@ quick_error! {
             from()
             display("✘ Parse float error: {}", err)
         }
+        FromUtf8Error(err: std::str::Utf8Error) {
+            from()
+            display("✘ From UTF8 error: {}", err)
+        }
+        FromIoError(err: std::io::Error) {
+            from()
+            display("✘ From I/O error: {}", err)
+        }
         NoneError(err: &'static str) {
             display("✘ None error: {}", err)
         }

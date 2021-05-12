@@ -6,24 +6,31 @@ use crate::lib::{
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Assets(pub Vec<Asset>);
+pub struct Assets {
+    pub assets: Vec<Asset>,
+    pub coinmarketcap_api_key: String,
+}
 
 impl Assets {
-    pub fn new(assets: Vec<Asset>) -> Self {
-        Self(assets)
+    pub fn new(assets: Vec<Asset>, coinmarketcap_api_key: &str) -> Self {
+        Self {
+            assets,
+            coinmarketcap_api_key: coinmarketcap_api_key.to_string(),
+        }
     }
 
-    pub fn from_strings(strings: &[String]) -> Result<Self> {
+    pub fn from_strings(strings: &[String], coinmarketcap_api_key: &str) -> Result<Self> {
         Ok(Assets::new(
             strings
                 .iter()
                 .map(|asset_string| Asset::from_str(&asset_string))
                 .collect::<Result<Vec<Asset>>>()?,
+            coinmarketcap_api_key,
         ))
     }
 
     fn get_prices(&self, amounts: &[f64], rate: &ExchangeRate) -> Result<Vec<JsonValue>> {
-        self.0
+        self.assets
             .iter()
             .enumerate()
             .map(|(i, asset)| asset.get_price_for_x(amounts[i], rate))
