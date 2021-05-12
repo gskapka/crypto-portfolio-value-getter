@@ -144,8 +144,10 @@ impl Asset {
             "amount": x,
             "asset": self.to_ticker(),
             "currency": rate.get_symbol(),
+            "exchange_rate": rate.get_rate(),
             "value": (unit_price * x * 100.0).round() / 100.0,
             "unit_price": (unit_price * 100.0 ).round() / 100.0,
+            "unit_price_usd": (usd_price * 100.0 ).round() / 100.0,
         }))
     }
 

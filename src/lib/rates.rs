@@ -40,7 +40,7 @@ pub struct ExchangeRates {
 
 impl ExchangeRates {
     pub fn get() -> Result<Self> {
-        Self::make_rate_reqwest("https://api.exchangeratesapi.io/latest?base=USD")
+        Self::make_rate_reqwest("https://api.ratesapi.io/api/latest?base=USD")
             .and_then(|json| Self::get_gbp_from_json(&json))
             .map(|gbp| Self { gbp })
     }
