@@ -14,9 +14,19 @@ First clone the dir, enter the dir & build the tool:
 
 __`❍ cargo b --release`__
 
-Then call the binary via to see the usage info:
+Then get yourself a _coinmarketcap_ API key __[via their website here](https://pro.coinmarketcap.com/signup/)__.
 
-__`❍ ./target/release/getprice of ethereum 1.337 bitcoin 0.623`__
+Once built, enter __`./target/release`__ to find the binary.
+
+Encrypt your _coinmarketcap_ API key __[using gpg](https://www.gnupg.org/gph/en/manual/x110.html)__:
+
+__`❍ echo <YOUR-API-KEY-HERE> | gpg -c --output coinmarketcap-api-key.gpg`__
+
+(The __`-c`__ here meaning symmetric encryption. Use __`-e`__ if assymmetric encryption is desired!)
+
+And finally, use the tool to get the price of some ethereum & bitcoin via:
+
+__`❍ ./getprice of ethereum 1.337 bitcoin 0.623`__
 
 ```
 {
@@ -42,7 +52,7 @@ __`❍ ./target/release/getprice of ethereum 1.337 bitcoin 0.623`__
 
 For more info, call the binary via:
 
-__`❍ ./target/release/getprice --help`__
+__`❍ ./getprice --help`__
 
 ```
 ❍ Crypto Portfolio Value Getter ❍
