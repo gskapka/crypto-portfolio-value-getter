@@ -34,11 +34,11 @@ impl Assets {
         price_jsons
             .iter()
             .map(|json| -> Result<f64> {
-                Ok(json
+                json
                     .get("value")
                     .ok_or(NoneError("No `value` field in JSON!"))?
                     .as_f64()
-                    .ok_or(NoneError("Could not parse to f64!"))?)
+                    .ok_or(NoneError("Could not parse to f64!"))
             })
             .collect::<Result<Vec<f64>>>()
     }

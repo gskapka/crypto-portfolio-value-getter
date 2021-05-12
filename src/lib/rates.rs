@@ -52,7 +52,7 @@ impl ExchangeRates {
     fn get_gbp_from_json(json: &JsonValue) -> Result<f64> {
         let rates = json.get("rates").ok_or(NoneError("No `rates` in JSON!"))?;
         let maybe_gbp = rates.get("GBP").ok_or(NoneError("No `GBP` in rates json!"))?;
-        Ok(maybe_gbp.as_f64().ok_or(NoneError("broke"))?)
+        maybe_gbp.as_f64().ok_or(NoneError("Couldn't get GBP rate as f64!"))
     }
 }
 
