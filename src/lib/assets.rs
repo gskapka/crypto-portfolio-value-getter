@@ -34,8 +34,7 @@ impl Assets {
         price_jsons
             .iter()
             .map(|json| -> Result<f64> {
-                json
-                    .get("value")
+                json.get("value")
                     .ok_or(NoneError("No `value` field in JSON!"))?
                     .as_f64()
                     .ok_or(NoneError("Could not parse to f64!"))
@@ -111,7 +110,7 @@ impl Asset {
                 let btc_price_in_usd = Asset::from_str("btc")?.get_usd_price()?;
                 let pnt_price_in_usd = pnt_price_in_btc * btc_price_in_usd;
                 Ok(pnt_price_in_usd)
-            }
+            },
             _ => {
                 let string_vec: Vec<String> = serde_json::from_str(
                     &json_value
@@ -128,7 +127,7 @@ impl Asset {
                     .map(|string| -> Result<f64> { Ok(string.parse::<f64>()?) })
                     .collect::<Result<Vec<f64>>>()?;
                 Ok(f64_vec[0])
-            }
+            },
         }
     }
 
@@ -209,7 +208,9 @@ mod tests {
     fn should_get_pnt_price() {
         let amount = 1.0;
         let asset = Asset::from_str("pnt").unwrap();
-        let result = asset.get_price_for_x(amount, &ExchangeRate::get("USD").unwrap()).unwrap();
+        let result = asset
+            .get_price_for_x(amount, &ExchangeRate::get("USD").unwrap())
+            .unwrap();
         println!("result {}", result.to_string());
     }
 }

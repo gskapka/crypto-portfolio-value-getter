@@ -1,7 +1,6 @@
-use crate::lib::types::{ Result, NoneError};
-
 use serde_json::Value as JsonValue;
 
+use crate::lib::types::{NoneError, Result};
 
 #[derive(Debug)]
 pub enum ExchangeRate {
