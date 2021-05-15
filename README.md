@@ -4,19 +4,25 @@ A verrrry simple rust CLI for getting & totalling various crypto prices. Use it 
 
 &nbsp;
 
-***
-
-&nbsp;
-
-### :point_right: Usage:
+## :point_right: Usage:
 
 First clone the dir, enter the dir & build the tool:
 
 __`❍ cargo b --release`__
 
-Then call the binary via to see the usage info:
+Then get yourself a _coinmarketcap_ API key __[via their website here](https://pro.coinmarketcap.com/signup/)__.
 
-__`❍ ./target/release/getprice of ethereum 1.337 bitcoin 0.623`__
+Once built, enter __`./target/release`__ to find the binary.
+
+Encrypt your _coinmarketcap_ API key __[using gpg](https://www.gnupg.org/gph/en/manual/x110.html)__:
+
+__`❍ echo <YOUR-API-KEY-HERE> | gpg -c --output coinmarketcap-api-key.gpg`__
+
+(The __`-c`__ here meaning symmetric encryption. Use __`-e`__ if assymmetric encryption is desired!)
+
+And finally, use the tool to get the price of some ethereum & bitcoin (or whatever you want...) via:
+
+__`❍ ./getprice of ETH 1.337 BTC 0.623 <PATH_TO_API_KEY>/coinmarketcap-api-key.gpg --currency=GBP`__
 
 ```
 {
@@ -42,7 +48,8 @@ __`❍ ./target/release/getprice of ethereum 1.337 bitcoin 0.623`__
 
 For more info, call the binary via:
 
-__`❍ ./target/release/getprice --help`__
+__`❍ ./getprice --help`__
+
 
 ```
 ❍ Crypto Portfolio Value Getter ❍
@@ -58,7 +65,7 @@ A simple CLI for getting & summing the price of various crypto assets.
 
 Usage:  getprice --help
         getprice version
-        getprice of (<symbol> <amount>)...
+        getprice of (<symbol> <amount>)... <keyFilePath> [--currency=<SYMBOL>]
 
 Commands:
 
@@ -66,27 +73,21 @@ Commands:
     of                    ❍ Gets the price of a given token.
     <symbol>              ❍ The symbol of a given token, eg ETH.
     <amount>              ❍ The amount of that given token to calculate the price of.
+    <keyFilePath>         ❍ The path to your GPP-encrypted CoinMarketCap API key file.
 
 Options:
 
     --help                ❍ Show this message.
+
+    --currency=<SYMBOL>    ❍ Which currency to get prices in [default: USD]
+
 ```
 
-***
-
 &nbsp;
 
-### :page_with_curl: Notes:
+## :guardsman: Tests
 
-It's currently only supporting very few crypto assets - mainly those that I give a hoot about.
-
-&nbsp;
-
-***
-
-&nbsp;
-
-### :guardsman: Tests
+__NOTE:__ The tests require a coinmarketcap API key set as the environment-variable __`API_KEY`__!
 
 To run the tests simply run:
 
@@ -94,9 +95,5 @@ __`❍ cargo test`__
 
 &nbsp;
 
-***
-
-&nbsp;
-
-### :black_nib: To Do:
-- [ ] Add more assets
+## :black_nib: To Do:
+- [x] Add more assets

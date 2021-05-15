@@ -1,5 +1,7 @@
 mod lib;
 #[macro_use]
+extern crate log;
+#[macro_use]
 extern crate quick_error;
 #[macro_use]
 extern crate serde_derive;
@@ -18,17 +20,18 @@ fn main() -> Result<()> {
         CliArgs { cmd_of: true, .. } => get_price_of(
             &cli_args.arg_symbol,
             &cli_args.arg_amount,
-            &cli_args.flag_currency
+            &cli_args.flag_currency,
+            &cli_args.arg_keyFilePath,
         ),
         _ => Err(USAGE_INFO.into()),
     }) {
         Ok(result) => {
             println!("{}", result);
             Ok(())
-        }
+        },
         Err(err) => {
             println!("{}", err);
             std::process::exit(1);
-        }
+        },
     }
 }

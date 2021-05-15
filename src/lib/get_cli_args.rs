@@ -10,6 +10,7 @@ pub struct CliArgs {
     pub arg_amount: Vec<f64>,
     pub flag_currency: String,
     pub arg_symbol: Vec<String>,
+    pub arg_keyFilePath: String,
 }
 
 pub fn get_cli_args() -> Result<CliArgs> {

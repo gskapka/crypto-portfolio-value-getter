@@ -1,7 +1,6 @@
-use crate::lib::types::{ Result, NoneError};
-
 use serde_json::Value as JsonValue;
 
+use crate::lib::types::{NoneError, Result};
 
 #[derive(Debug)]
 pub enum ExchangeRate {
@@ -40,7 +39,7 @@ pub struct ExchangeRates {
 
 impl ExchangeRates {
     pub fn get() -> Result<Self> {
-        Self::make_rate_reqwest("https://api.exchangeratesapi.io/latest?base=USD")
+        Self::make_rate_reqwest("https://api.ratesapi.io/api/latest?base=USD")
             .and_then(|json| Self::get_gbp_from_json(&json))
             .map(|gbp| Self { gbp })
     }
@@ -52,7 +51,7 @@ impl ExchangeRates {
     fn get_gbp_from_json(json: &JsonValue) -> Result<f64> {
         let rates = json.get("rates").ok_or(NoneError("No `rates` in JSON!"))?;
         let maybe_gbp = rates.get("GBP").ok_or(NoneError("No `GBP` in rates json!"))?;
-        Ok(maybe_gbp.as_f64().ok_or(NoneError("broke"))?)
+        maybe_gbp.as_f64().ok_or(NoneError("Couldn't get GBP rate as f64!"))
     }
 }
 
