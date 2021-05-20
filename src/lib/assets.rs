@@ -1,9 +1,6 @@
 use serde_json::{json, Value as JsonValue};
 
-use crate::lib::{
-    rates::ExchangeRate,
-    types::{NoneError, Result},
-};
+use crate::lib::types::{NoneError, Result};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Assets {
@@ -26,11 +23,11 @@ impl Assets {
         )
     }
 
-    fn get_prices(&self, amounts: &[f64], rate: &ExchangeRate) -> Result<Vec<JsonValue>> {
+    fn get_prices(&self, amounts: &[f64]) -> Result<Vec<JsonValue>> {
         self.assets
             .iter()
             .enumerate()
-            .map(|(i, asset)| asset.get_price_for_x(amounts[i], rate, &self.coinmarketcap_api_key))
+            .map(|(i, asset)| asset.get_price_for_x(amounts[i], &self.coinmarketcap_api_key))
             .collect()
     }
 
@@ -50,8 +47,8 @@ impl Assets {
         Ok(Self::get_value_totals(price_jsons)?.iter().sum())
     }
 
-    pub fn get_prices_json(&self, amounts: &[f64], rate: &ExchangeRate) -> Result<JsonValue> {
-        let prices = self.get_prices(amounts, rate)?;
+    pub fn get_prices_json(&self, amounts: &[f64]) -> Result<JsonValue> {
+        let prices = self.get_prices(amounts)?;
         let sum = Self::sum_values(&prices)?;
         Ok(json!({ "total_value": (sum * 100.0).round() / 100.0, "prices": prices }))
     }
@@ -99,16 +96,12 @@ impl Asset {
         )
     }
 
-    pub fn get_price_for_x(&self, x: f64, rate: &ExchangeRate, api_key: &str) -> Result<JsonValue> {
+    pub fn get_price_for_x(&self, x: f64, api_key: &str) -> Result<JsonValue> {
         let usd_price = self.get_usd_price_from_coinmarketcap(api_key)?;
-        let unit_price = usd_price * rate.get_rate();
         Ok(json!({
             "amount": x,
             "asset": self.to_ticker(),
-            "currency": rate.get_symbol(),
-            "exchange_rate": rate.get_rate(),
-            "value": (unit_price * x * 100.0).round() / 100.0,
-            "unit_price": (unit_price * 100.0 ).round() / 100.0,
+            "value": (usd_price * x * 100.0).round() / 100.0,
             "unit_price_usd": (usd_price * 100.0 ).round() / 100.0,
         }))
     }
