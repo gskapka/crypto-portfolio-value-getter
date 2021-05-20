@@ -12,7 +12,7 @@ A simple CLI for getting & summing the price of various crypto assets.
 
 Usage:  getprice --help
         getprice version
-        getprice of (<symbol> <amount>)... <keyFilePath> [--currency=<SYMBOL>]
+        getprice of (<symbol> <amount>)... <keyFilePath>
 
 Commands:
 
@@ -25,7 +25,5 @@ Commands:
 Options:
 
     --help                ❍ Show this message.
-
-    --currency=<SYMBOL>    ❍ Which currency to get prices in [default: USD]
 
 ";

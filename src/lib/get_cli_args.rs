@@ -8,7 +8,6 @@ pub struct CliArgs {
     pub cmd_of: bool,
     pub cmd_version: bool,
     pub arg_amount: Vec<f64>,
-    pub flag_currency: String,
     pub arg_symbol: Vec<String>,
     pub arg_keyFilePath: String,
 }
