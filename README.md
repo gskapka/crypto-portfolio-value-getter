@@ -22,7 +22,7 @@ __`❍ echo <YOUR-API-KEY-HERE> | gpg -c --output coinmarketcap-api-key.gpg`__
 
 And finally, use the tool to get the price of some ethereum & bitcoin (or whatever you want...) via:
 
-__`❍ ./getprice of ETH 1.337 BTC 0.623 <PATH_TO_API_KEY>/coinmarketcap-api-key.gpg --currency=GBP`__
+__`❍ ./getprice of ETH 1.337 BTC 0.623 <PATH_TO_API_KEY>/coinmarketcap-api-key.gpg`__
 
 ```
 {
@@ -65,7 +65,7 @@ A simple CLI for getting & summing the price of various crypto assets.
 
 Usage:  getprice --help
         getprice version
-        getprice of (<symbol> <amount>)... <keyFilePath> [--currency=<SYMBOL>]
+        getprice of (<symbol> <amount>)... <keyFilePath>
 
 Commands:
 
@@ -78,8 +78,6 @@ Commands:
 Options:
 
     --help                ❍ Show this message.
-
-    --currency=<SYMBOL>    ❍ Which currency to get prices in [default: USD]
 
 ```
 
